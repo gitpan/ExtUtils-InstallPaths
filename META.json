@@ -1,0 +1,54 @@
+{
+   "abstract" : "Build.PL install path logic made easy",
+   "author" : [
+      "Leon Timmermans <fawaka@gmail.com>"
+   ],
+   "dynamic_config" : 0,
+   "generated_by" : "Dist::Zilla version 4.200004, CPAN::Meta::Converter version 2.110580",
+   "license" : [
+      "perl_5"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : "2"
+   },
+   "name" : "ExtUtils-InstallPaths",
+   "prereqs" : {
+      "configure" : {
+         "requires" : {
+            "ExtUtils::MakeMaker" : "6.31"
+         }
+      },
+      "runtime" : {
+         "requires" : {
+            "Carp" : 0,
+            "ExtUtils::Config" : 0,
+            "File::Spec" : 0,
+            "perl" : "5.006"
+         }
+      },
+      "test" : {
+         "requires" : {
+            "Config" : 0,
+            "ExtUtils::Config" : "0.002",
+            "File::Spec::Functions" : 0,
+            "File::Temp" : 0,
+            "Test::More" : 0
+         }
+      }
+   },
+   "release_status" : "stable",
+   "resources" : {
+      "bugtracker" : {
+         "mailto" : "bug-extutils-installpaths at rt.cpan.org",
+         "web" : "http://rt.cpan.org/Public/Dist/Display.html?Name=ExtUtils-InstallPaths"
+      },
+      "repository" : {
+         "type" : "git",
+         "url" : "git://github.com/Leont/extutils-installpaths.git",
+         "web" : "http://github.com/Leont/extutils-installpaths"
+      }
+   },
+   "version" : "0.001"
+}
+
