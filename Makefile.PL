@@ -4,13 +4,13 @@ use warnings;
 
 BEGIN { require 5.006; }
 
-use ExtUtils::MakeMaker 6.31;
+use ExtUtils::MakeMaker 6.30;
 
 
 
 my %WriteMakefileArgs = (
   'ABSTRACT' => 'Build.PL install path logic made easy',
-  'AUTHOR' => 'Leon Timmermans <fawaka@gmail.com>',
+  'AUTHOR' => 'Ken Williams <kwilliams@cpan.org>, Leon Timmermans <leont@cpan.org>',
   'BUILD_REQUIRES' => {
     'Config' => '0',
     'ExtUtils::Config' => '0.002',
@@ -19,7 +19,7 @@ my %WriteMakefileArgs = (
     'Test::More' => '0'
   },
   'CONFIGURE_REQUIRES' => {
-    'ExtUtils::MakeMaker' => '6.31'
+    'ExtUtils::MakeMaker' => '6.30'
   },
   'DISTNAME' => 'ExtUtils-InstallPaths',
   'EXE_FILES' => [],
@@ -30,7 +30,7 @@ my %WriteMakefileArgs = (
     'ExtUtils::Config' => '0',
     'File::Spec' => '0'
   },
-  'VERSION' => '0.001',
+  'VERSION' => '0.002',
   'test' => {
     'TESTS' => 't/*.t'
   }

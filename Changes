@@ -1,4 +1,8 @@
 Revision history for ExtUtils-InstallPaths
 
+0.002     2011-05-08 11:59:59 Europe/Amsterdam
+          Fixed case insensitive file matching in test
+          Fixed attribution
+
 0.001     2011-04-04 15:32:56 Europe/Amsterdam
-    -
+    -     Initial version

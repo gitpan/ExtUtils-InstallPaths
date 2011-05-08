@@ -41,7 +41,7 @@ my $config = ExtUtils::Config->new({
 	installsitehtml3dir => catdir($tmp, 'site', 'html'),
 });
 
-my $mb = ExtUtils::InstallPaths->new(installdirs => 'site', config => $config, module_name => 'ExtUtils::InstallPaths');
+my $mb = ExtUtils::InstallPaths->new(installdirs => 'site', config => $config, dist_name => 'ExtUtils-InstallPaths');
 isa_ok($mb, 'ExtUtils::InstallPaths');
 
 # Get us into a known state.
@@ -285,8 +285,7 @@ sub dir_contains {
 
 	return 0 if @second_dirs < @first_dirs;
 
-	# XXX case sensitivity check
-	my $is_same = ( 0 ? sub { lc(shift()) eq lc(shift()) } : sub { shift() eq shift() });
+	my $is_same = ( File::Spec->case_tolerant ? sub { lc(shift()) eq lc(shift()) } : sub { shift() eq shift() });
 
 	while (@first_dirs) {
 		return 0 unless $is_same->(shift @first_dirs, shift @second_dirs);

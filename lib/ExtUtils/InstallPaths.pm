@@ -1,6 +1,6 @@
 package ExtUtils::InstallPaths;
 BEGIN {
-  $ExtUtils::InstallPaths::VERSION = '0.001';
+  $ExtUtils::InstallPaths::VERSION = '0.002';
 }
 use 5.006;
 use strict;
@@ -17,7 +17,7 @@ my %attributes = (
 	verbose         => 0,
 	blib            => 'blib',
 	create_packlist => 1,
-	module_name     => undef,
+	dist_name       => undef,
 	destdir         => undef
 );
 
@@ -177,6 +177,7 @@ sub installdirs {
 	my $self = shift;
 	if (@_) {
 		my $value = shift;
+		$value = 'core', Carp::carp('Perhaps you meant installdirs to be "core" rather than "perl"?') if $value eq 'perl';
 		Carp::croak('installdirs must be one of "core", "site", or "vendor"') if not $allowed_installdir{$value};
 		$self->{installdirs} = $value;
 	}
@@ -506,9 +507,9 @@ sub install_map {
 	warn "WARNING: Can't figure out install path for types: @skipping\nFiles will not be installed.\n" if @skipping;
 
 	# Write the packlist into the same place as ExtUtils::MakeMaker.
-	if ($self->create_packlist and my $module_name = $self->module_name) {
+	if ($self->create_packlist and my $dist_name = $self->dist_name) {
 		my $archdir = $self->install_destination('arch');
-		my @ext = split /::/, $module_name;
+		my @ext = split /-/, $dist_name;
 		$map{write} = File::Spec->catfile($archdir, 'auto', @ext, '.packlist');
 	}
 
@@ -555,14 +556,14 @@ ExtUtils::InstallPaths - Build.PL install path logic made easy
 
 =head1 VERSION
 
-version 0.001
+version 0.002
 
 =head1 SYNOPSIS
 
  use ExtUtils::InstallPaths;
  use ExtUtils::Install 'install';
  GetOptions(\my %opt, 'install_base=s', 'install_path=s%', 'installdirs=s', 'destdir=s', 'prefix=s', 'uninst:1', 'verbose:1');
- my $paths = ExtUtils::InstallPaths->new(%opt, module_name => $module_name);
+ my $paths = ExtUtils::InstallPaths->new(%opt, dist_name => $dist_name);
  install($paths->install_map, $opt{verbose}, 0, $opt{uninst});
 
 =head1 DESCRIPTION
@@ -660,9 +661,9 @@ Sets the location of the blib directory, it defaults to 'blib'.
 
 =head2 create_packlist
 
-Controls whether a packlist will be added together with C<module_name>. Defaults to 1.
+Controls whether a packlist will be added together with C<dist_name>. Defaults to 1.
 
-=head2 module_name
+=head2 dist_name
 
 The name of the current module. This is required for packlist creation. If undefined (the default)
 
@@ -748,13 +749,23 @@ Get or set a configuration key. This should be used sparingly.
 
 =back
 
-=head1 AUTHOR
+=head1 AUTHORS
 
-Leon Timmermans <fawaka@gmail.com>
+=over 4
+
+=item *
+
+Ken Williams <kwilliams@cpan.org>
+
+=item *
+
+Leon Timmermans <leont@cpan.org>
+
+=back
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2011 by Leon Timmermans.
+This software is copyright (c) 2011 by Ken Williams, Leon Timmermans.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
