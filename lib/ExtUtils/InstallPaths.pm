@@ -1,6 +1,6 @@
 package ExtUtils::InstallPaths;
 BEGIN {
-  $ExtUtils::InstallPaths::VERSION = '0.002';
+  $ExtUtils::InstallPaths::VERSION = '0.003';
 }
 use 5.006;
 use strict;
@@ -18,6 +18,7 @@ my %attributes = (
 	blib            => 'blib',
 	create_packlist => 1,
 	dist_name       => undef,
+	module_name     => undef,
 	destdir         => undef
 );
 
@@ -39,6 +40,7 @@ sub new {
 		(map { $_ => $args{$_} || {} } qw/install_path install_base_relpaths prefix_relpaths/),
 		map { $_ => exists $args{$_} ? $args{$_} : $attributes{$_} } keys %attributes,
 	);
+	$self{module_name} ||= do { my $module_name = $self{dist_name}; $module_name =~ s/-/::/g; $module_name } if defined $self{dist_name};
 	return bless \%self, $class;
 }
 
@@ -507,9 +509,9 @@ sub install_map {
 	warn "WARNING: Can't figure out install path for types: @skipping\nFiles will not be installed.\n" if @skipping;
 
 	# Write the packlist into the same place as ExtUtils::MakeMaker.
-	if ($self->create_packlist and my $dist_name = $self->dist_name) {
+	if ($self->create_packlist and my $module_name = $self->module_name) {
 		my $archdir = $self->install_destination('arch');
-		my @ext = split /-/, $dist_name;
+		my @ext = split /::/, $module_name;
 		$map{write} = File::Spec->catfile($archdir, 'auto', @ext, '.packlist');
 	}
 
@@ -556,7 +558,7 @@ ExtUtils::InstallPaths - Build.PL install path logic made easy
 
 =head1 VERSION
 
-version 0.002
+version 0.003
 
 =head1 SYNOPSIS
 
@@ -661,11 +663,15 @@ Sets the location of the blib directory, it defaults to 'blib'.
 
 =head2 create_packlist
 
-Controls whether a packlist will be added together with C<dist_name>. Defaults to 1.
+Controls whether a packlist will be added together with C<module_name>. Defaults to 1.
 
 =head2 dist_name
 
-The name of the current module. This is required for packlist creation. If undefined (the default)
+The name of the current module.
+
+=head2 module_name
+
+The name of the main module of the package. This is required for packlist creation, but in the future it may be replaced by dist_name. It defaults to dist_name =~ s/-/::/gr if dist_name is set.
 
 =head2 destdir
 
