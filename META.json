@@ -5,7 +5,7 @@
       "Leon Timmermans <leont@cpan.org>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Dist::Zilla version 4.200008, CPAN::Meta::Converter version 2.110440",
+   "generated_by" : "Dist::Zilla version 4.300000, CPAN::Meta::Converter version 2.110440",
    "license" : [
       "perl_5"
    ],
@@ -23,15 +23,17 @@
       "runtime" : {
          "requires" : {
             "Carp" : 0,
-            "ExtUtils::Config" : 0,
+            "ExtUtils::Config" : "0.002",
             "File::Spec" : 0,
-            "perl" : "5.006"
+            "perl" : "5.006",
+            "strict" : 0,
+            "warnings" : 0
          }
       },
       "test" : {
          "requires" : {
             "Config" : 0,
-            "ExtUtils::Config" : "0.002",
+            "File::Find" : 0,
             "File::Spec::Functions" : 0,
             "File::Temp" : 0,
             "Test::More" : 0
@@ -50,6 +52,6 @@
          "web" : "http://github.com/Leont/extutils-installpaths"
       }
    },
-   "version" : "0.003"
+   "version" : "0.004"
 }
 

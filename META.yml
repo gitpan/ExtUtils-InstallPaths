@@ -5,14 +5,14 @@ author:
   - 'Leon Timmermans <leont@cpan.org>'
 build_requires:
   Config: 0
-  ExtUtils::Config: 0.002
+  File::Find: 0
   File::Spec::Functions: 0
   File::Temp: 0
   Test::More: 0
 configure_requires:
   ExtUtils::MakeMaker: 6.30
 dynamic_config: 0
-generated_by: 'Dist::Zilla version 4.200008, CPAN::Meta::Converter version 2.110440'
+generated_by: 'Dist::Zilla version 4.300000, CPAN::Meta::Converter version 2.110440'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -20,10 +20,12 @@ meta-spec:
 name: ExtUtils-InstallPaths
 requires:
   Carp: 0
-  ExtUtils::Config: 0
+  ExtUtils::Config: 0.002
   File::Spec: 0
   perl: 5.006
+  strict: 0
+  warnings: 0
 resources:
   bugtracker: http://rt.cpan.org/Public/Dist/Display.html?Name=ExtUtils-InstallPaths
   repository: git://github.com/Leont/extutils-installpaths.git
-version: 0.003
+version: 0.004
