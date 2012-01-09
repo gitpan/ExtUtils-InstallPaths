@@ -1,6 +1,6 @@
 package ExtUtils::InstallPaths;
 {
-  $ExtUtils::InstallPaths::VERSION = '0.004';
+  $ExtUtils::InstallPaths::VERSION = '0.005';
 }
 use 5.006;
 use strict;
@@ -222,7 +222,7 @@ sub install_path {
 	my $self = shift;
 
 	my $map = $self->{install_path};
-	return $map unless @_;
+	return { %{$map} } unless @_;
 
 	my $type = shift;
 	Carp::croak('Type argument missing') unless defined $type ;
@@ -259,7 +259,7 @@ sub install_sets {
 		return $map->{$dirs}{$key};
 	}
 	elsif (defined $dirs) {
-		return $map->{$dirs};
+		return { %{ $map->{$dirs} } };
 	}
 	else {
 		Carp::croak('Can\'t determine installdirs for install_sets()');
@@ -294,7 +294,7 @@ sub install_base_relpaths {
 		$self->_set_relpaths($self->{install_base_relpaths}, @_);
 	}
 	my $map = $self->_merge_arglist($self->{install_base_relpaths}, $self->_default_base_relpaths);
-	return $map unless @_;
+	return { %{$map} } unless @_;
 	my $relpath = $map->{$_[0]};
 	return defined $relpath ? File::Spec->catdir( @$relpath ) : undef;
 }
@@ -310,7 +310,7 @@ sub prefix_relpaths {
 		$self->_set_relpaths($self->{prefix_relpaths}{$installdirs}, @_);
 	}
 	my $map = $self->_merge_arglist($self->{prefix_relpaths}{$installdirs}, $self->_default_prefix_relpaths->{$installdirs});
-	return $map unless @_;
+	return { %{$map} } unless @_;
 	my $relpath = $map->{$_[0]};
 	return defined $relpath ? File::Spec->catdir( @$relpath ) : undef;
 }
@@ -329,10 +329,8 @@ sub _prefixify_default {
 	}
 }
 
-if ($^O ne 'VMS') {
-	eval <<'EOF';
 # Translated from ExtUtils::MM_Unix::prefixify()
-sub _prefixify {
+sub _prefixify_novms {
 	my($self, $path, $sprefix, $type) = @_;
 
 	my $rprefix = $self->prefix;
@@ -354,13 +352,8 @@ sub _prefixify {
 
 	return $path;
 }
-EOF
-}
-else {
-	eval <<'EOF';
-require VMS::Filespec;
 
-sub _catprefix {
+sub _catprefix_vms {
 	my ($self, $rprefix, $default) = @_;
 
 	my ($rvol, $rdirs) = File::Spec->splitpath($rprefix);
@@ -371,8 +364,7 @@ sub _catprefix {
 		return File::Spec->catdir($rdirs, $default);
 	}
 }
-
-sub _prefixify {
+sub _prefixify_vms {
 	my($self, $path, $sprefix, $type) = @_;
 	my $rprefix = $self->prefix;
 
@@ -380,6 +372,7 @@ sub _prefixify {
 
 	$self->_log_verbose("  prefixify $path from $sprefix to $rprefix\n");
 
+	require VMS::Filespec;
 	# Translate $(PERLPREFIX) to a real path.
 	$rprefix = VMS::Filespec::vmspath($rprefix) if $rprefix;
 	$sprefix = VMS::Filespec::vmspath($sprefix) if $sprefix;
@@ -402,7 +395,7 @@ sub _prefixify {
 			$self->_log_verbose("  $vms_prefix: seen\n");
 
 			$path_dirs =~ s{^\[}{\[.} unless $path_dirs =~ m{^\[\.};
-			$path = $self->_catprefix($rprefix, $path_dirs);
+			$path = $self->_catprefix_vms($rprefix, $path_dirs);
 		}
 		else {
 			$self->_log_verbose("	cannot prefixify.\n");
@@ -414,8 +407,8 @@ sub _prefixify {
 
 	return $path;
 }
-EOF
-}
+
+BEGIN { *_prefixify = $^O eq 'VMS' ? \&_prefixify_vms : \&_prefixify_novms }
 
 sub original_prefix {
 	# Usage: original_prefix(), original_prefix('lib'),
@@ -427,7 +420,7 @@ sub original_prefix {
 		$self->{original_prefix}{$key} = $value;
 	}
 	my $map = $self->_merge_arglist($self->{original_prefix}, $self->_default_original_prefix);
-	return $map unless defined $key;
+	return { %{$map} } unless defined $key;
 	return $map->{$key}
 }
 
@@ -552,7 +545,7 @@ ExtUtils::InstallPaths - Build.PL install path logic made easy
 
 =head1 VERSION
 
-version 0.004
+version 0.005
 
 =head1 SYNOPSIS
 
