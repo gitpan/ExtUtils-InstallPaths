@@ -1,7 +1,8 @@
 package ExtUtils::InstallPaths;
 {
-  $ExtUtils::InstallPaths::VERSION = '0.005';
+  $ExtUtils::InstallPaths::VERSION = '0.006';
 }
+
 use 5.006;
 use strict;
 use warnings;
@@ -10,7 +11,7 @@ use File::Spec ();
 use Carp ();
 use ExtUtils::Config 0.002;
 
-my %explicit_accessors = map { $_ => 1 } qw/installdirs install_path install_base_relpaths prefix_relpaths/;
+my %explicit_accessors = map { $_ => 1 } qw/installdirs install_path install_base_relpaths prefix_relpaths original_prefix install_sets/;
 
 my %attributes = (
 	installdirs     => 'site',
@@ -225,7 +226,7 @@ sub install_path {
 	return { %{$map} } unless @_;
 
 	my $type = shift;
-	Carp::croak('Type argument missing') unless defined $type ;
+	Carp::croak('Type argument missing') unless defined $type;
 	
 	if (@_) {
 		my $new_value = shift;
@@ -294,7 +295,7 @@ sub install_base_relpaths {
 		$self->_set_relpaths($self->{install_base_relpaths}, @_);
 	}
 	my $map = $self->_merge_arglist($self->{install_base_relpaths}, $self->_default_base_relpaths);
-	return { %{$map} } unless @_;
+	return $map unless @_;
 	my $relpath = $map->{$_[0]};
 	return defined $relpath ? File::Spec->catdir( @$relpath ) : undef;
 }
@@ -310,7 +311,7 @@ sub prefix_relpaths {
 		$self->_set_relpaths($self->{prefix_relpaths}{$installdirs}, @_);
 	}
 	my $map = $self->_merge_arglist($self->{prefix_relpaths}{$installdirs}, $self->_default_prefix_relpaths->{$installdirs});
-	return { %{$map} } unless @_;
+	return $map unless @_;
 	my $relpath = $map->{$_[0]};
 	return defined $relpath ? File::Spec->catdir( @$relpath ) : undef;
 }
@@ -420,7 +421,7 @@ sub original_prefix {
 		$self->{original_prefix}{$key} = $value;
 	}
 	my $map = $self->_merge_arglist($self->{original_prefix}, $self->_default_original_prefix);
-	return { %{$map} } unless defined $key;
+	return $map unless defined $key;
 	return $map->{$key}
 }
 
@@ -536,7 +537,7 @@ sub install_map {
 # ABSTRACT: Build.PL install path logic made easy
 
 
-
+__END__
 =pod
 
 =head1 NAME
@@ -545,7 +546,7 @@ ExtUtils::InstallPaths - Build.PL install path logic made easy
 
 =head1 VERSION
 
-version 0.005
+version 0.006
 
 =head1 SYNOPSIS
 
@@ -559,15 +560,15 @@ version 0.005
 
 This module tries to make install path resolution as easy as possible.
 
-When you want to install a module, it needs to figure out where to install things. The nutshell version of how this works is that default installation locations are determined from L<ExtUtils::Config>, and they may be overridden by using the C<install_path> attribute. An C<install_base> attribute lets you specify an alternative installation root like F</home/foo> and C<prefix> does something similar in a rather different (and more complicated) way. C<destdir> lets you specify a temporary installation directory like F</tmp/install> in case you want to create bundled-up installable packages.
+When you want to install a module, it needs to figure out where to install things. The nutshell version of how this works is that default installation locations are determined from L<ExtUtils::Config>, and they may be individually overridden by using the C<install_path> attribute. An C<install_base> attribute lets you specify an alternative installation root like F</home/foo> and C<prefix> does something similar in a rather different (and more complicated) way. C<destdir> lets you specify a temporary installation directory like F</tmp/install> in case you want to create bundled-up installable packages.
 
-The following types are supported in any circumstance.
+The following types are supported by default.
 
 =over 4
 
 =item * lib
 
-Usually pure-Perl module files ending in F<.pm>.
+Usually pure-Perl module files ending in F<.pm> or F<.pod>.
 
 =item * arch
 
@@ -575,7 +576,7 @@ Usually pure-Perl module files ending in F<.pm>.
 
 =item * script
 
-Programs written in pure Perl.  In order to improve reuse, try to make these as small as possible - put the code into modules whenever possible.
+Programs written in pure Perl.  In order to improve reuse, you may want to make these as small as possible - put the code into modules whenever possible.
 
 =item * bin
 
@@ -583,19 +584,19 @@ Programs written in pure Perl.  In order to improve reuse, try to make these as 
 
 =item * bindoc
 
-Documentation for the stuff in C<script> and C<bin>.  Usually generated from the POD in those files.  Under Unix, these are manual pages belonging to the 'man1' category.
+Documentation for the stuff in C<script> and C<bin>.  Usually generated from the POD in those files.  Under Unix, these are manual pages belonging to the 'man1' category. Unless explicitly set, this is only available on platforms supporting manpages.
 
 =item * libdoc
 
-Documentation for the stuff in C<lib> and C<arch>.  This is usually generated from the POD in F<.pm> files.  Under Unix, these are manual pages belonging to the 'man3' category.
+Documentation for the stuff in C<lib> and C<arch>.  This is usually generated from the POD in F<.pm> and F<.pod> files.  Under Unix, these are manual pages belonging to the 'man3' category. Unless explicitly set, this is only available on platforms supporting manpages.
 
 =item * binhtml
 
-This is the same as C<bindoc> above, but applies to HTML documents.
+This is the same as C<bindoc> above, but applies to HTML documents. Unless explicitly set, this is only available when perl was configured to do so.
 
 =item * libhtml
 
-This is the same as C<bindoc> above, but applies to HTML documents.
+This is the same as C<libdoc> above, but applies to HTML documents. Unless explicitly set, this is only available when perl was configured to do so.
 
 =back
 
@@ -612,7 +613,7 @@ The default destinations for these installable things come from entries in your 
 
   lib     => installprivlib  installsitelib      installvendorlib
   arch    => installarchlib  installsitearch     installvendorarch
-  script  => installscript   installsitebin      installvendorbin
+  script  => installscript   installsitescript   installvendorscript
   bin     => installbin      installsitebin      installvendorbin
   bindoc  => installman1dir  installsiteman1dir  installvendorman1dir
   libdoc  => installman3dir  installsiteman3dir  installvendorman3dir
@@ -642,19 +643,19 @@ This sets a prefix, identical to ExtUtils::MakeMaker's PREFIX option. This does 
 
 =head2 config()
 
-Gets the L<ExtUtils::Config|ExtUtils::Config> object used for this object.
+The L<ExtUtils::Config|ExtUtils::Config> object used for this object.
 
 =head2 verbose
 
-Sets the verbosity of ExtUtils::InstallPaths. It defaults to 0
+The verbosity of ExtUtils::InstallPaths. It defaults to 0
 
 =head2 blib
 
-Sets the location of the blib directory, it defaults to 'blib'.
+The location of the blib directory, it defaults to 'blib'.
 
 =head2 create_packlist
 
-Controls whether a packlist will be added together with C<module_name>. Defaults to 1.
+Together with C<module_name> this controls whether a packlist will be added; it defaults to 1.
 
 =head2 dist_name
 
@@ -662,7 +663,7 @@ The name of the current module.
 
 =head2 module_name
 
-The name of the main module of the package. This is required for packlist creation, but in the future it may be replaced by dist_name. It defaults to dist_name =~ s/-/::/gr if dist_name is set.
+The name of the main module of the package. This is required for packlist creation, but in the future it may be replaced by dist_name. It defaults to C<dist_name =~ s/-/::/gr> if dist_name is set.
 
 =head2 destdir
 
@@ -672,7 +673,7 @@ If you want to install everything into a temporary directory first (for instance
 
 =head2 new
 
-Create a new ExtUtils::InstallPaths object. B<All attributes are valid arguments> to the contructor, as well as this:
+Create a new ExtUtils::InstallPaths object. B<All attributes are valid arguments> to the constructor, as well as this:
 
 =over 4
 
@@ -688,6 +689,14 @@ This must be a hashref with types as keys and a path relative to the install_bas
 
 This must be a hashref any of these three keys: core, vendor, site. Each of the values mush be a hashref with types as keys and a path relative to the prefix as value. You probably want to make these three hashrefs identical.
 
+=item * original_prefix
+
+This must be a hashref with the legal installdirs values as keys and the prefix directories as values.
+
+=item * install_sets
+
+This mush be a hashref with the legal installdirs are keys, and the values being hashrefs with types as keys and locations as values.
+
 =back
 
 =head2 install_map()
@@ -696,7 +705,7 @@ Return a map suitable for use with L<ExtUtils::Install>. B<In most cases, this i
 
 =head2 install_destination($type)
 
-Returns the destination of a certain type
+Returns the destination of a certain type.
 
 =head2 install_types()
 
@@ -760,7 +769,4 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-
-
-__END__
 

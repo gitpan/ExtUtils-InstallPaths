@@ -6,7 +6,6 @@ META.json
 META.yml
 Makefile.PL
 README
-SIGNATURE
 dist.ini
 lib/ExtUtils/InstallPaths.pm
 t/00-compile.t
