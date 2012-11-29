@@ -1,5 +1,9 @@
 Revision history for ExtUtils-InstallPaths
 
+0.008     2012-11-29 21:13:50 Europe/Amsterdam
+          Don't require ExtUtils::Config object
+          Fix portability issues in test paths
+
 0.007     2012-11-22 21:00:18 Europe/Amsterdam
           Refactor everything into sanity
 

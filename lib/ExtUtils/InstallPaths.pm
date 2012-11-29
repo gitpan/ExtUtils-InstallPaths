@@ -1,6 +1,6 @@
 package ExtUtils::InstallPaths;
 {
-  $ExtUtils::InstallPaths::VERSION = '0.007';
+  $ExtUtils::InstallPaths::VERSION = '0.008';
 }
 
 use 5.006;
@@ -89,9 +89,7 @@ for my $attribute (keys %defaults) {
 
 sub new {
 	my ($class, %args) = @_;
-	my $config = $args{config} || Carp::confess; #ExtUtils::Config->new;
-	#use Data::Dumper;
-	#warn Dumper $args{config}->values_set  if keys %{ $config->values_set };
+	my $config = $args{config} || ExtUtils::Config->new;
 	my %self = (
 		config => $config,
 		map { $_ => exists $args{$_} ? $filter{$_} ? $filter{$_}->($args{$_}, $config) : $args{$_} : ref $defaults{$_} ? $defaults{$_}->($config) : $defaults{$_} } keys %defaults,
@@ -437,7 +435,7 @@ ExtUtils::InstallPaths - Build.PL install path logic made easy
 
 =head1 VERSION
 
-version 0.007
+version 0.008
 
 =head1 SYNOPSIS
 
