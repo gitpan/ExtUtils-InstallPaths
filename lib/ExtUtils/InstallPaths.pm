@@ -1,6 +1,6 @@
 package ExtUtils::InstallPaths;
 {
-  $ExtUtils::InstallPaths::VERSION = '0.008';
+  $ExtUtils::InstallPaths::VERSION = '0.009';
 }
 
 use 5.006;
@@ -25,37 +25,40 @@ my %defaults = (
 	module_name     => undef,
 	destdir         => undef,
 	install_path    => sub { {} },
-	install_sets    => sub { _default_install_sets($_[0]) },
-	original_prefix => sub { _default_original_prefix($_[0]) },
-	install_base_relpaths => sub { _default_base_relpaths($_[0]) },
-	prefix_relpaths => sub { _default_prefix_relpaths($_[0]) },
+	install_sets    => \&_default_install_sets,
+	original_prefix => \&_default_original_prefix,
+	install_base_relpaths => \&_default_base_relpaths,
+	prefix_relpaths => \&_default_prefix_relpaths,
 );
 
-sub _merger {
-	my $name = shift;
+sub _merge_shallow {
+	my ($name, $filter) = @_;
 	return sub {
 		my ($override, $config) = @_;
 		my $defaults = $defaults{$name}->($config);
-
-		my %new_opts = %$override;
-		while (my ($key, $val) = each %$defaults) {
-			if (exists $override->{$key}) {
-				if (ref($val) eq 'HASH') {
-					while (my ($k, $v) = each %$val) {
-					   $new_opts{$key}{$k} = $v unless exists $override->{$key}{$k};
-					}
-				}
-			} else {
-				$new_opts{$key} = $val
-			}
-		}
-
-		return \%new_opts;
+		$filter->($_) for grep $filter, values %$override;
+		return { %$defaults, %$override };
 	}
 }
 
+sub _merge_deep {
+	my ($name, $filter) = @_;
+	return sub {
+		my ($override, $config) = @_;
+		my $defaults = $defaults{$name}->($config);
+		my $pair_for = sub {
+			my $key = shift;
+			my %override = %{ $override->{$key} || {} };
+			$filter && $filter->($_) for values %override;
+			return $key => { %{ $defaults->{$key} }, %override };
+		};
+		return { map { $pair_for->($_) } keys %$defaults };
+	}
+}
 
 my %allowed_installdir = map { $_ => 1 } qw/core site vendor/;
+my $must_be_relative = sub { Carp::croak('Value must be a relative path') if File::Spec->file_name_is_absolute($_[0]) };
+my %deep_filter = map { $_ => $must_be_relative } qw/install_base_relpaths prefix_relpaths/;
 my %filter = (
 	installdirs => sub {
 		my $value = shift;
@@ -63,7 +66,8 @@ my %filter = (
 		Carp::croak('installdirs must be one of "core", "site", or "vendor"') if not $allowed_installdir{$value};
 		return $value;
 	},
-	map { $_ => _merger($_) } qw/install_sets original_prefix install_base_relpaths prefix_relpaths/,
+	(map { $_ => _merge_shallow($_, $deep_filter{$_}) } qw/original_prefix install_base_relpaths/),
+	(map { $_ => _merge_deep($_, $deep_filter{$_}) } qw/install_sets prefix_relpaths/),
 );
 
 for my $attribute (keys %defaults) {
@@ -435,7 +439,7 @@ ExtUtils::InstallPaths - Build.PL install path logic made easy
 
 =head1 VERSION
 
-version 0.008
+version 0.009
 
 =head1 SYNOPSIS
 
